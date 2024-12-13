@@ -220,6 +220,47 @@ def read_csv(
     xlabel, ylabels, xunit, yunits = get_labels_units_from_dataframe(df)
     return xydata, xlabel, xunit, ylabels, yunits, header
 
+def read_csv_time(
+    filename: str,
+    worker: CallbackWorker | None = None,
+) -> tuple[
+    np.ndarray, str | None, str | None, list[str] | None, list[str] | None, str | None
+]:
+    """Read CSV data, and return tuple (xydata, xlabel, xunit, ylabels, yunits, header).
+
+    Args:
+        filename: CSV file name
+        worker: Callback worker object
+
+    Returns:
+        Tuple (xydata, xlabel, xunit, ylabels, yunits, header)
+    """
+    xydata, xlabel, xunit, ylabels, yunits, header = None, None, None, None, None, None
+
+    df = pd.read_csv(
+        filename,
+        delimiter=',',
+        # skiprows=1,
+        comment="#",
+        nrows=1000,  # Read only the first 1000 lines,
+        parse_dates=True
+    )
+
+    df['time'] = pd.to_datetime(df['time'], errors='coerce').astype(int)
+
+    for col in df.columns:
+        df[col] = df[col].astype(float)
+
+    # Remove rows and columns where all values are NaN in the DataFrame:
+    df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
+
+    # Converting to NumPy array
+    xydata = df.to_numpy(float)
+    if xydata.size == 0:
+        raise ValueError("Unable to read CSV file (no supported data after cleaning)")
+
+    xlabel, ylabels, xunit, yunits = get_labels_units_from_dataframe(df)
+    return xydata, xlabel, xunit, ylabels, yunits, header
 
 def write_csv(
     filename: str,

@@ -44,7 +44,7 @@ class CSVSignalFormat(SignalFormatBase):
         Returns:
             List of signal objects
         """
-        xydata, xlabel, xunit, ylabels, yunits, header = funcs.read_csv(
+        xydata, xlabel, xunit, ylabels, yunits, header = funcs.read_csv_time(
             filename, worker
         )
         if ylabels:
