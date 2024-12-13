@@ -246,7 +246,8 @@ def read_csv_time(
         parse_dates=True
     )
 
-    df['time'] = pd.to_datetime(df['time'], errors='coerce').astype(int)
+    df['time'] = pd.to_datetime(df['time'], errors='coerce')
+    df = df.set_index('time')
 
     for col in df.columns:
         df[col] = df[col].astype(float)
@@ -255,12 +256,14 @@ def read_csv_time(
     df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
 
     # Converting to NumPy array
-    xydata = df.to_numpy(float)
-    if xydata.size == 0:
+    time_data = df.index.to_numpy()
+    time_data = np.expand_dims(time_data, axis=1)
+    ydata = df.to_numpy(float)
+    if ydata.size == 0:
         raise ValueError("Unable to read CSV file (no supported data after cleaning)")
 
-    xlabel, ylabels, xunit, yunits = get_labels_units_from_dataframe(df)
-    return xydata, xlabel, xunit, ylabels, yunits, header
+    xlabel, ylabels, xunit, yunits = get_labels_units_from_dataframe(df.reset_index())
+    return time_data, ydata, xlabel, xunit, ylabels, yunits, header
 
 def write_csv(
     filename: str,

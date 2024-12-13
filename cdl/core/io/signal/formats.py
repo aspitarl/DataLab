@@ -44,7 +44,7 @@ class CSVSignalFormat(SignalFormatBase):
         Returns:
             List of signal objects
         """
-        xydata, xlabel, xunit, ylabels, yunits, header = funcs.read_csv_time(
+        time_data, ydata, xlabel, xunit, ylabels, yunits, header = funcs.read_csv_time(
             filename, worker
         )
         if ylabels:
@@ -53,7 +53,7 @@ class CSVSignalFormat(SignalFormatBase):
             objs = []
             for i, (ylabel, yunit) in enumerate(zip(ylabels, yunits)):
                 obj = self.create_object(filename, i if len(ylabels) > 1 else None)
-                obj.set_xydata(xydata[:, 0], xydata[:, i + 1])
+                obj.set_xydata(time_data, ydata)
                 obj.xlabel = xlabel or ""
                 obj.xunit = xunit or ""
                 obj.ylabel = ylabel or ""
@@ -62,7 +62,7 @@ class CSVSignalFormat(SignalFormatBase):
                     obj.metadata[self.HEADER_KEY] = header
                 objs.append(obj)
             return objs
-        return self.create_signals_from(xydata, filename)
+        return self.create_signals_from(ydata, filename)
 
     def write(self, filename: str, obj: SignalObj) -> None:
         """Write data to file
